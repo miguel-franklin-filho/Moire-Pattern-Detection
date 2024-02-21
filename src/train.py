@@ -1,4 +1,4 @@
-#To detect Moire ́ patternzs, images are first decomposed using Wavelet decomposition (refer to file '') and trained using multi-input Convolutional neural network. The strength of the proposed CNN model is, it uses the LL intensity image (from the Wavelet decomposition) as a weight parameter for the Moire ́ pattern, thereby approximating the spatial spread of the Moire ́ pattern in the image. Usage of CNN model performs better than frequency thresholding approach as the model is trained considering diverse scenarios and it is able to distinguish between the high frequency of background texture and the Moire ́ pattern.
+# To detect Moire ́ patternzs, images are first decomposed using Wavelet decomposition (refer to file '') and trained using multi-input Convolutional neural network. The strength of the proposed CNN model is, it uses the LL intensity image (from the Wavelet decomposition) as a weight parameter for the Moire ́ pattern, thereby approximating the spatial spread of the Moire ́ pattern in the image. Usage of CNN model performs better than frequency thresholding approach as the model is trained considering diverse scenarios and it is able to distinguish between the high frequency of background texture and the Moire ́ pattern.
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -15,7 +15,7 @@ from mCNN import createModel
 from keras.utils import np_utils # utilities for one-hot encoding of ground truth values
 from keras.callbacks import ModelCheckpoint
 
-#constants
+# constants
 WIDTH = 500#384
 HEIGHT = 375#512
 
@@ -27,19 +27,16 @@ def scaleData(inp, minimum, maximum):
     return inp
 
 
-
-
 # - read positive and negative training data
 # - create X and Y from training data
 
 
-def main(args):
-    positiveImagePath = (args.positiveImages)
-    negativeImagePath = (args.negativeImages)
-    numEpochs = (args.epochs)
-    positiveTrainImagePath = args.trainingDataPositive
-    negativeTrainImagePath = args.trainingDataNegative
-
+def main(positiveImages, negativeImages, trainingDataPositive, trainingDataNegative, epochs):
+    positiveImagePath = (positiveImages)
+    negativeImagePath = (negativeImages)
+    numEpochs = (epochs)
+    positiveTrainImagePath = trainingDataPositive
+    negativeTrainImagePath = trainingDataNegative
     
     X_LL, X_LH, X_HL, X_HH, X_index, Y, imageCount = readWaveletData(positiveImagePath, negativeImagePath, positiveTrainImagePath, negativeTrainImagePath)
     
@@ -48,9 +45,7 @@ def main(args):
     model = trainCNNModel(X_LL_train,X_LH_train,X_HL_train,X_HH_train,Y_train,
              X_LL_test,X_LH_test,X_HL_test,X_HH_test,Y_test, numEpochs)
     
-    evaluate(model, X_LL_test,X_LH_test,X_HL_test,X_HH_test,Y_test)
-    
-    
+    evaluate(model, X_LL_test,X_LH_test,X_HL_test,X_HH_test,Y_test)   
 
 
 def readAndScaleImage(f, customStr, trainImagePath, X_LL, X_LH, X_HL, X_HH, X_index, Y, sampleIndex, sampleVal):
@@ -92,7 +87,7 @@ def readAndScaleImage(f, customStr, trainImagePath, X_LL, X_LH, X_HL, X_HH, X_in
     X_index[sampleIndex, 0] = sampleIndex;
     
     return True
-    
+
 def readImageSet(imageFiles, trainImagePath, X_LL, X_LH, X_HL, X_HH, X_index, Y, sampleIndex, bClass):
 
     for f in imageFiles:
@@ -111,8 +106,8 @@ def readImageSet(imageFiles, trainImagePath, X_LL, X_LH, X_HL, X_HH, X_index, Y,
             sampleIndex = sampleIndex + 1
      
     return sampleIndex
-            
-            
+
+
 def readWaveletData(positiveImagePath, negativeImagePath, positiveTrainImagePath, negativeTrainImagePath):
     
     # get augmented, balanced training data image files by class
@@ -144,15 +139,11 @@ def readWaveletData(positiveImagePath, negativeImagePath, positiveTrainImagePath
     print('negative data loaded.')
 
     print('Total Samples Loaded: ', sampleIndex)
-    print(X_LL)
-    print(X_LH)
-    print(Y)
     
     return X_LL, X_LH, X_HL, X_HH, X_index, Y, imageCount
 
 
-
-#Here, we perform index based splitting and use those indices to split the our multi-input datasets. This is done because the CNN model is multi-input network
+# Here, we perform index based splitting and use those indices to split the our multi-input datasets. This is done because the CNN model is multi-input network
 def splitTrainTestDataForBands(inputData, X_train_ind, X_test_ind):
     X_train = np.zeros((len(X_train_ind), WIDTH*HEIGHT))
     for i in range(len(X_train_ind)):
@@ -173,8 +164,6 @@ def countPositiveSamplesAfterSplit(trainData):
     return count
 
 
-
-
 def trainTestSplit(X_LL, X_LH, X_HL, X_HH, X_index, Y, imageCount):
     testCountPercent = 0.1
 
@@ -190,11 +179,11 @@ def trainTestSplit(X_LL, X_LH, X_HL, X_HH, X_index, Y, imageCount):
     imageWidth = WIDTH
 
 
-    print(countPositiveSamplesAfterSplit(y_train))
-    print(len(X_LL_train))
-    print(len(y_train))
-    print(len(X_LL_test))
-    print(len(y_test))
+    # print(countPositiveSamplesAfterSplit(y_train))
+    # print(len(X_LL_train))
+    # print(len(y_train))
+    # print(len(X_LL_test))
+    # print(len(y_test))
 
     num_train_samples = len(y_train)
     print('num_train_samples', num_train_samples)
@@ -227,8 +216,6 @@ def trainTestSplit(X_LL, X_LH, X_HL, X_HH, X_index, Y, imageCount):
     num_classes = len(np.unique(y_train))
     
     return X_LL_train,X_LH_train,X_HL_train,X_HH_train,y_train,X_LL_test,X_LH_test,X_HL_test,X_HH_test,y_test
-
-
 
 
 def trainCNNModel(X_LL_train,X_LH_train,X_HL_train,X_HH_train,y_train,
@@ -318,6 +305,11 @@ def parse_arguments(argv):
     return parser.parse_args(argv)
 
 if __name__ == '__main__':
-    main(parse_arguments(sys.argv[1:]))
-    
-    
+    args = parse_arguments(sys.argv[1:])
+    main(
+        args.positiveImages,
+        args.negativeImages,
+        args.trainingDataPositive,
+        args.trainingDataNegative,
+        args.epochs,
+    )
